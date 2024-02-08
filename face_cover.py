@@ -5,14 +5,11 @@ from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
 from tensorflow.keras.preprocessing.image import img_to_array
 from tensorflow.keras.models import load_model
 
-# Load pre-trained face detection model
 face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_alt2.xml')
-
-# Load pre-trained face mask detection model
 maskNet = load_model("model.h5")
 
 
-# Function to detect face masks
+# Function to detect face cover
 def detect_mask(frame):
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     faces = face_cascade.detectMultiScale(gray,
@@ -28,8 +25,9 @@ def detect_mask(frame):
         face_resized = img_to_array(face_resized)
         face_resized = preprocess_input(face_resized)
         face_resized = np.expand_dims(face_resized, axis=0)
-
         faces_list.append(face_resized)
+
+        # Predict whether the face is covered or not
         if len(faces_list) > 0:
             preds = maskNet.predict(faces_list)
         for pred in preds:
@@ -43,7 +41,7 @@ def detect_mask(frame):
                     cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
 
         cv2.rectangle(frame, (x, y), (x + w, y + h), color, 3)
-        # Predict whether the face is wearing a mask or not
+      
 
 
     return frame
